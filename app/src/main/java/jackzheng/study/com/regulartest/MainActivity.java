@@ -9,6 +9,8 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import jackzheng.study.com.regulartest.regular.RegularUtilsTest;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -26,6 +28,11 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+        try {
+            RegularUtilsTest.getIntance(this).test1();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
