@@ -14,7 +14,7 @@ public class StringDealFactory {
     public final static char ALL_SUM_CHAR = '合';
     public final static char COUNT_SIGN_CHAR = '注';
     public final static char KILL_SIGN_CHAR = '杀';
-    private static final char[] ALL_SIGN_LIST = {',','，','.','。','/','、',' ','-','_','—','=','+'};
+    private static final char[] ALL_SIGN_LIST = {',','，','.','。','/','、',' ','-','_','—','=','+',':',':','：'};
     private final static String  NEW_SPILE_SIGN = "死";
 
     //目前使用在单组多个位置多注数的情况，合数
@@ -24,7 +24,7 @@ public class StringDealFactory {
     public static char[] ALL_NUMBER_REPALCE = {'0','1','2','3','4','5','6','7','8','9'};
 
     private static final char[] GROUP_SIGN_LIST = {'全','单','双','大','小'};
-    private static String[] GROUP_VALUE_LIST = {"0123456789","13579","02468","56789","01234"};
+    private static String[] GROUP_VALUE_LIST = {"-0123456789-","-13579-","-02468-","-56789-","-01234-"};
 
     private static final char[]  NOREPEAT_SIGN_LIST = {'排','无','去','不'};
     private static final char[] DUPLICATE_SIGN_LIST = {'重','从'};
@@ -39,6 +39,45 @@ public class StringDealFactory {
         str = weirdReplace(str);
 //        Log.d("zsbin","weirdReplace:str ="+str);
         ArrayList<String> list =   spileString(str);
+        for(int i= 0;i< list.size() ;i++){
+            String s = list.get(i);
+            if(s.contains("下奖")){
+                String str1 = "";
+                String str2 = "";
+                list.remove(i);
+                s = s.replace("下奖",StringDealFactory.NEW_SPILE_SIGN);
+                char[] cs = s.toCharArray();
+                StringBuilder builder = new StringBuilder();
+                int index = 0;
+                while(index < cs.length && !isNumber(cs[index])){
+                    builder.append(cs[index]);
+                    index++;
+                }
+                str2 += builder.toString();
+                str1 += builder.toString();
+                builder = new StringBuilder();
+                str1 += "0123456789-";
+                while (index <cs.length && isNumber(cs[index])){
+                    builder.append(cs[index]);
+                    index++;
+                }
+                str2 += builder.toString();
+                str1 += builder.toString();
+                str2 += "-0123456789";
+                builder = new StringBuilder();
+                while (index <cs.length){
+                    builder.append(cs[index]);
+                    index++;
+                }
+                str2 += builder.toString();
+                str1 += builder.toString();
+                Log.d("zsbin","String 1 ="+str1);
+                Log.d("zsbin","String 2 ="+str2);
+                list.add(i,str1);
+                list.add(i,str2);
+            }
+
+        }
 //        for(int i = 0 ;i <list.size();i++){
 //            Log.d("zsbin","siglen:data["+i+"] ="+list.get(i));
 //        }
@@ -70,17 +109,27 @@ public class StringDealFactory {
         }
         for(;start<=end;){
             if(isSpileChar(list[start])){
-                char c = list[start];
-                while (isSpileChar(list[start])){
-                    if(c == ' ' && list[start] != ' ' ){
-                        c = list[start];
+                ArrayList<Character> mtmpChar = new ArrayList<>();
+                boolean isHave = false;
+                while (start <= end && isSpileChar(list[start])){
+                    if(mtmpChar.size() == 0 ){
+                        mtmpChar.add(list[start]);
+                        build.append(list[start]);
+                    }else{
+                        isHave = false;
+                        for(Character c :mtmpChar){
+                            if(c == list[start]){
+                                isHave = true;
+                                break;
+                            }
+                        }
+                        if(!isHave){
+                            mtmpChar.add(list[start]);
+                            build.append(list[start]);
+                        }
                     }
                     start++;
-                    if(start ==  list.length){
-                        break;
-                    }
                 }
-                build.append(c);
             }else{
                 build.append(list[start]);
                 start++;
@@ -154,7 +203,7 @@ public class StringDealFactory {
               }
               newStr = repalaceAAssociation(cs[i]);
              if(newStr != null){
-                 builder.append(NEW_SPILE_SIGN+newStr+NEW_SPILE_SIGN);
+                 builder.append(newStr);
                  continue;
              }else if(cs[i] == '位'  && i >1 && isNumber(cs[i-1]) && isNumber(cs[i-2])){
                 int fri = cs[i-2] - '1';
@@ -237,31 +286,10 @@ public class StringDealFactory {
                  builder.append(StringDealFactory.NEW_SPLIE_CHAR);
              }else if(cs[i] == '下'){
 
-                 if(i >0 && i< cs.length-2 && isNumber(cs[i-1]) && cs[i+1]== '奖' && isNumber(cs[i+2])){
-                  //   Log.d("zsbin","下奖："+builder.toString());
-                     int index = i;
-                     index =1;
-                     StringBuilder builde2 = new StringBuilder();
-                     StringBuilder builde3 = new StringBuilder();
-                     while (index <= i && isNumber(cs[i-index])){
-                         builde2.append(cs[i-index]);
-                         index++;
-                     }
-                     index--;
-                     builder.delete(builder.length()-index, builder.length());
-                   //  Log.d("zsbin","下奖："+builder.toString()+" index="+index+" leng = "+cs.length );
-                     builder.append(StringDealFactory.NEW_SPLIE_CHAR);
-                     index = i;
-                     index++;
-                     while (index < cs.length && isNumber(cs[index])){
-                         builde3.append(cs[index]);
-                         index ++;
-                     }
-                     i = index -1;
-                     String tmp0 = builde2.toString();
-                     String tmp =tmp0 +"-0123456789,0123456789-"+tmp0+"="+builde3.toString();
-                     builder.append(tmp);
-                     builder.append(StringDealFactory.NEW_SPLIE_CHAR);
+                 if(i< cs.length-1 && cs[i+1]== '奖' ){
+                         builder.append(cs[i]);
+                         i++;
+                         builder.append(cs[i]);
                  }else{
                      builder.append(StringDealFactory.NEW_SPLIE_CHAR);
                      i++;
@@ -387,29 +415,35 @@ public class StringDealFactory {
     private static ArrayList<String> sigleLineSpile(String str){
         ArrayList<String> list = new ArrayList<>();
         ArrayList<Character> noSplieChars = new ArrayList<>();
+        noSplieChars.add('=');
+
         StringBuilder builder = new StringBuilder();
         char[] cs = str.toCharArray();
         int numCount = 0;
 
-        char thirdSplie = getThirdSplie(cs);
-        if(thirdSplie != 'E'){
-            ArrayList<String> list2 = new ArrayList<>();
-            boolean isSuccess =sigleLineSpileLoop(list2,cs,0,thirdSplie);
-            if(isSuccess){
-                return list2;
-            }
-        }
+//        char thirdSplie = getThirdSplie(cs);
+//        if(thirdSplie != 'E'){
+//            ArrayList<String> list2 = new ArrayList<>();
+//            boolean isSuccess =sigleLineSpileLoop(list2,cs,0,thirdSplie);
+//            if(isSuccess){
+//                return list2;
+//            }
+//        }
 
         for(int i = 0 ; i< cs.length ;){
-            if(isNumber(cs[i])){
-                numCount ++;
-                while (isNumber(cs[i])){
+            if(isNumber(cs[i])) {
+                numCount++;
+                while (isNumber(cs[i])) {
                     builder.append(cs[i]);
                     i++;
-                    if(i ==  cs.length){
+                    if (i == cs.length) {
                         break;
                     }
                 }
+            }else if(isSpileChar(cs[i]) && numCount == 1){
+                builder.append(cs[i]);
+                noSplieChars.add(cs[i]);
+                i++;
             }else if(isSpileChar(cs[i]) && numCount >= 2 && isNoSpileChar(cs[i],noSplieChars)){
                 Log.d("zsbin","noSplieChars  "+cs[i]);
                 ArrayList<String> list2 = new ArrayList<>();

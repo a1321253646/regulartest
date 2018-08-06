@@ -23,7 +23,7 @@ public class RegularUtils2 {
             DateBean2 date = new DateBean2();
             SingleStrDealBean bean2 = new SingleStrDealBean();
             getLocalAnOther(data,numberCount,bean2);
-         //   Log.d("zsbin",data +" getLocalAnOther =\n"+bean2);
+            Log.d("zsbin",data +" getLocalAnOther =\n"+bean2);
             if(bean2.numberList.size() >3 ){
                 for(int i = 0; i<bean2.numberList.size()-1 ;i++){
                     if(bean2.numberCountList.get(i) != 2){
@@ -106,7 +106,7 @@ public class RegularUtils2 {
                         spile1 = bean2.spilStrList.get(0);
                     }
                     if(bean2.numberCountList.get(0) !=2){
-                        if(spile1.equals("-") || spile1.equals("—") || spile1.equals("一") || spile1.equals("。") || spile1.equals(".")){
+                        if((stringCount >1 && spile1.equals("/") || spile1.equals("，") ) ||spile1.equals("-") || spile1.equals("—") || spile1.equals("一") || spile1.equals("。") || spile1.equals(".")){
                             date.mDataList.add(getIntFormString(bean2.numberList.get(0)));
                             date.mDataList.add(getIntFormString(bean2.numberList.get(1)));
                             bean2.mLocalCount.add(0);
@@ -116,7 +116,7 @@ public class RegularUtils2 {
                             bean2.mLocalCount.add(Integer.parseInt(bean2.numberList.get(1)));
                         }
                     }else{
-                        if(spile1.equals("-") || spile1.equals("—")){
+                         if( (stringCount >1 && spile1.equals("/") || spile1.equals("，") ) || spile1.equals("-") || spile1.equals("—")){
                             date.mDataList.add(getIntFormString(bean2.numberList.get(0)));
                             date.mDataList.add(getIntFormString(bean2.numberList.get(1)));
                             bean2.mLocalCount.add(0);
@@ -167,43 +167,104 @@ public class RegularUtils2 {
 
     //整理位置和注数
     private static ArrayList<DateBean2> dealDate(ArrayList<DateBean2>  list){
-        int localCount = 0;
-        ArrayList<Integer[]> localList =null;
-        for(DateBean2 date : list){
-            if(date.local.size() != 0){
-                localList = date.local;
-                localCount++;
-            }
-        }
-        if(localCount < list.size() && localCount == 1){
-            for(DateBean2 date : list){
-                if(date.local.size() == 0){
-                    date.local.addAll(localList);
-                }
-            }
-        }else if(localCount < list.size() && localCount > 1){
-            for(DateBean2 date : list){
-                if(date.local.size() == 0){
-                    date.local.add(new Integer[]{4,5});
-                }
-            }
-        }else if(localCount == 0){
-            for(DateBean2 date : list){
-                if(date.local.size() == 0){
-                    date.local.add(new Integer[]{4,5});
-                }
-            }
-        }
-        for(int i = 0 ;i<list.size();i++){
-            if(list.get(i).mCountList.size() == 1 && list.get(i).mCountList.get(0) == 0){
-                list.get(i).mCountList = getCount(list,i);
-                if(list.get(i).mCountList.size() == 0){
-                    return null;
-                }
-            }
+        getLocal(list);
+
+        boolean isgetCont = getCount(list);
+        if(!isgetCont){
+            return null;
         }
         duplicateRemove(list);
         return list;
+    }
+    private static boolean  getCount(ArrayList<DateBean2>  list){
+        boolean isBack = true;
+        for(int i = 0 ; i<list.size();i++){
+            if(list.get(i).mCountList.size() == 0){
+                continue;
+            }else if( list.get(i).mCountList.get(0) != 0){
+                isBack = true;
+                continue;
+            }else if( list.get(i).mCountList.get(0) == 0){
+                if(isBack){
+                    int index = i;
+                    index++;
+                    while (index <list.size() && (list.get(index).mCountList.size()==0 ||  list.get(index).mCountList.get(0) == 0)){
+                        index ++;
+                    }
+                    if(index == list.size()){
+                        if(i >0 ){
+                            index = i;
+                            index --;
+                            while (index >= 0 &&  list.get(index).mCountList.size() ==0){
+                                index --;
+                            }
+                            if(index < 0){
+                                return false;
+                            }else{
+                                list.get(i).mCountList = list.get(i-1).mCountList;
+                                isBack = false;
+                            }
+                        }else{
+                            return false;
+                        }
+                    }else{
+                        list.get(i).mCountList = list.get(index).mCountList;
+                    }
+                }else{
+                    int index = i;
+                    index --;
+                    while (index >= 0 &&  list.get(index).mCountList.size() ==0){
+                        index --;
+                    }
+                    if(index < 0){
+                        return false;
+                    }else{
+                        list.get(i).mCountList = list.get(i-1).mCountList;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    private static void getLocal(ArrayList<DateBean2>  list){
+        boolean isBack = true;
+        for(int i = 0 ; i<list.size();i++){
+            if(list.get(i).mLastData.size() == 0 && list.get(i).mDataList.size() == 0 && list.get(i).local.size() != 0){
+                isBack = false;
+                continue;
+            }else if(list.get(i).local.size() >0 ){
+                isBack = true;
+            }else if(list.get(i).local.size() == 0){
+                int index = i;
+                if(!isBack){
+                    list.get(i).local.addAll(list.get(i-1).local);
+                }else{
+                    index++;
+                    while(index < list.size() && list.get(index).local.size() == 0){
+                        index++;
+                    }
+                    if(index == list.size()){
+                        isBack = false;
+                        if(i > 0){
+                            list.get(i).local.addAll(list.get(i-1).local);
+                        }else{
+                            list.get(i).local.add(new Integer[]{4,5});
+                        }
+                    }else{
+                        if(list.get(index).mDataList.size() == 0 && list.get(index).mLastData.size() ==0){
+                            if(i > 0 && list.get(i-1).local.size() != 0){
+                                isBack = false;
+                                list.get(i).local.addAll(list.get(i-1).local);
+                                continue;
+                            }
+                        }
+                        list.get(i).local.addAll(list.get(index).local);
+                    }
+                }
+            }
+
+        }
     }
     private static void duplicateRemove(ArrayList<DateBean2>  list){
         for(DateBean2 date :list){
@@ -249,16 +310,6 @@ public class RegularUtils2 {
         return ;
     }
 
-    private static ArrayList<Integer>  getCount(ArrayList<DateBean2>  list,int index){
-        if(index >= list.size()){
-           return new ArrayList<Integer>();
-        }
-        if(list.get(index).mCountList.size() == 1 && list.get(index).mCountList.get(0) == 0){
-            list.get(index).mCountList = getCount(list,index+1);
-        }
-        return list.get(index).mCountList;
-    }
-
     private static  ArrayList<Integer> getIntFormString(String str){
         char[] chars = str.toCharArray();
         ArrayList<Integer> mnumlist = new ArrayList<Integer>();
@@ -288,34 +339,31 @@ public class RegularUtils2 {
                     if (count != 0) {
                         deal.mLocalCount.add(count);
                     }
-                }else if( i < cs.length -2 && StringDealFactory.isLocal(cs[i+1]) && StringDealFactory.isLocal(cs[i+2])){
-                    deal.mLocal.add( new Integer[]{StringDealFactory.getLocalData(cs[i + 1]), StringDealFactory.getLocalData(cs[i + 2])});
-                    builder.append(StringDealFactory.NEW_SPLIE_CHAR);
-                    i = i+3;
                 }else if( i < cs.length -1 && StringDealFactory.isLocal(cs[i+1])) {
-                    Integer[] integers;
-                    if (deal.mLocal.size() == 0) {
-                        integers = new Integer[]{0, 0};
-                        integers[0] = StringDealFactory.getLocalData(cs[i + 1]);
-                        deal.mLocal.add(integers);
-                    } else {
-                        integers = deal.mLocal.get(deal.mLocal.size() - 1);
-                        if (integers != null && integers[0] != 0 && integers[1] != 0) {
+                    i++;
+                    while( i < cs.length  && StringDealFactory.isLocal(cs[i])){
+                        Integer[] integers;
+                        if (deal.mLocal.size() == 0) {
                             integers = new Integer[]{0, 0};
-                            integers[0] = StringDealFactory.getLocalData(cs[i + 1]);
+                            integers[0] = StringDealFactory.getLocalData(cs[i]);
                             deal.mLocal.add(integers);
                         } else {
-                            integers[1] = StringDealFactory.getLocalData(cs[i + 1]);
+                            integers = deal.mLocal.get(deal.mLocal.size() - 1);
+                            if (integers != null && integers[0] != 0 && integers[1] != 0) {
+                                integers = new Integer[]{0, 0};
+                                integers[0] = StringDealFactory.getLocalData(cs[i]);
+                                deal.mLocal.add(integers);
+                            } else {
+                                integers[1] = StringDealFactory.getLocalData(cs[i]);
+                            }
                         }
+                        i++;
                     }
                     builder.append(StringDealFactory.NEW_SPLIE_CHAR);
-                 //   deal.haveCount = true;
-                    i = i + 2;
                 }else{
                     builder.append(cs[i]);
                     i++;
                 }
-
             }else if(cs[i]==StringDealFactory.ALL_NOSUM_CHAR || cs[i] == StringDealFactory.ALL_SUM_CHAR){//提取合数
                 builder.append(StringDealFactory.NEW_SPLIE_CHAR);
                 char tmp = cs[i];
@@ -338,11 +386,17 @@ public class RegularUtils2 {
                 i++;
                 deal.isPai = true;
                 deal.haveGroup = true;
-                if(numCount == numberCount-1 && i < cs.length && StringDealFactory.isNumber(cs[i]) ){
+                if (numCount == numberCount - 1 && i < cs.length && StringDealFactory.isNumber(cs[i])) {
                     builder.append(StringDealFactory.COUNT_SIGN_CHAR);
                     deal.haveCount = true;
-                }else{
+                } else {
                     builder.append(StringDealFactory.NEW_SPLIE_CHAR);
+                }
+            }else if(cs[i] == '各'){
+                builder.append(cs[i]);
+                i++;
+                if(numberCount == 2){
+                    deal.haveGroup = true;
                 }
 
             }else if(cs[i]== StringDealFactory.KILL_SIGN_CHAR) {//处理杀
