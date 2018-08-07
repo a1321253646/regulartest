@@ -28,11 +28,20 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
-        try {
-            RegularUtilsTest.getIntance(this).test1();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
+        Thread thread= new Thread(){
+            @Override
+            public void run() {
+                 HtmlParse.parse();
+            }
+        };
+        thread.start();
+
+//        try {
+//            RegularUtilsTest.getIntance(this).test1();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
     }
 
     @Override
