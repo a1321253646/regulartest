@@ -105,30 +105,37 @@ public class RegularUtils2 {
                     }else if(bean2.spilStrList.size() == bean2.numberList.size()-1 ){
                         spile1 = bean2.spilStrList.get(0);
                     }
+                    Log.d("zsbin", " spile1 ="+spile1);
                     if(bean2.numberCountList.get(0) !=2){
-                        if((stringCount >1 && spile1.equals("/") || spile1.equals("，") ) ||spile1.equals("-") || spile1.equals("—") || spile1.equals("一") || spile1.equals("。") || spile1.equals(".")){
+                        if((stringCount >1 && spile1.equals("/") || spile1.equals("，") ) ||spile1.equals("-") || spile1.equals("—") || spile1.equals("一") || spile1.equals("。") /*|| spile1.equals(".")*/){
+                            Log.d("zsbin", " spile  = 1");
                             date.mDataList.add(getIntFormString(bean2.numberList.get(0)));
                             date.mDataList.add(getIntFormString(bean2.numberList.get(1)));
                             bean2.mLocalCount.add(0);
                         }else{
+                            Log.d("zsbin", " spile  = 2");
                             date.mDataList.add(getIntFormString(bean2.numberList.get(0)));
                             date.mDataList.add(getIntFormString(bean2.numberList.get(0)));
                             bean2.mLocalCount.add(Integer.parseInt(bean2.numberList.get(1)));
                         }
                     }else{
-                         if( (stringCount >1 && spile1.equals("/") || spile1.equals("，") ) || spile1.equals("-") || spile1.equals("—")){
+                         if( (stringCount >1 && spile1.equals("/") || spile1.equals("，") ) || spile1.equals("-") || spile1.equals("—")|| spile1.equals("一")){
+                             Log.d("zsbin", " spile  = 3");
                             date.mDataList.add(getIntFormString(bean2.numberList.get(0)));
                             date.mDataList.add(getIntFormString(bean2.numberList.get(1)));
                             bean2.mLocalCount.add(0);
                         }else if(bean2.haveGroup) {
+                             Log.d("zsbin", " spile  = 4");
                             date.mDataList.add(getIntFormString(bean2.numberList.get(0)));
                             date.mDataList.add(getIntFormString(bean2.numberList.get(0)));
                             bean2.mLocalCount.add(Integer.parseInt(bean2.numberList.get(1)));
                         }else if(bean2.numberCountList.get(0) ==2 && spile1.equals(" ")){
+                             Log.d("zsbin", " spile  = 5");
                             date.mLastData.add(new Integer[]{getIntFormString(bean2.numberList.get(0)).get(0),getIntFormString(bean2.numberList.get(0)).get(1)});
                             date.mLastData.add(new Integer[]{getIntFormString(bean2.numberList.get(1)).get(0),getIntFormString(bean2.numberList.get(1)).get(1)});
                             bean2.mLocalCount.add(0);
                         }else{
+                             Log.d("zsbin", " spile  = 6");
                             date.mLastData.add(new Integer[]{getIntFormString(bean2.numberList.get(0)).get(0),getIntFormString(bean2.numberList.get(0)).get(1)});
                             bean2.mLocalCount.add(Integer.parseInt(bean2.numberList.get(1)));
                         }

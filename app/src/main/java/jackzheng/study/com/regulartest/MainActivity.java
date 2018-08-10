@@ -29,19 +29,19 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Thread thread= new Thread(){
-            @Override
-            public void run() {
-                 HtmlParse.parse();
-            }
-        };
-        thread.start();
+//        Thread thread= new Thread(){
+//            @Override
+//            public void run() {
+//                 HtmlParse.parse();
+//            }
+//        };
+//        thread.start();
 
-//        try {
-//            RegularUtilsTest.getIntance(this).test1();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+        try {
+            RegularUtilsTest.getIntance(this).test1();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
